@@ -1,0 +1,146 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:GoodByeDPI.Core.ViewModels;assembly=GoodByeDPI.Core"
+             xmlns:converters="clr-namespace:GoodByeDPI.UI.Converters"
+             xmlns:core="clr-namespace:GoodByeDPI.Core;assembly=GoodByeDPI.Core"
+             x:Class="GoodByeDPI.UI.App"
+             RequestedThemeVariant="Dark"
+             x:DataType="vm:AppViewModel">
+
+    <Design.DataContext>
+        <vm:AppViewModel />
+    </Design.DataContext>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:BooleanToIconConverter x:Key="BooleanToIconConverter" />
+            <converters:BooleanToStartStopConverter x:Key="BooleanToStartStopConverter" />
+            <converters:DataContextToBoolean x:Key="DataContextToBoolean" />
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+
+                    <Color x:Key="UiWindowBackgroundColorInactive">#212121</Color>
+                    <Color x:Key="UiWindowBackgroundColorActive">#1E000000</Color>
+
+                    <Color x:Key="UiControlBorderColorBase">#F0212121</Color>
+                    <Color x:Key="UiControlBackgroundColorBase">#0CFFFFFF</Color>
+                    <Color x:Key="UiControlBackgroundColorBasePointerOver">#18FFFFFF</Color>
+
+                    <Color x:Key="UiControlBorderColorHigh">#18FFFFFF</Color>
+                    <Color x:Key="UiControlBackgroundColorHigh">#16FFFFFF</Color>
+
+                    <Color x:Key="UiControlBackgroundColorHighest">#20FFFFFF</Color>
+
+                    <Color x:Key="UiExpanderBorderColor">Transparent</Color>
+
+                    <Color x:Key="UiOverlayBackground">#20FFFFFF</Color>
+
+                    <Color x:Key="UiPopupBlurBackground">#111111</Color>
+
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+
+            <ResourceDictionary.MergedDictionaries>
+
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="UiWindowBackgroundBrushInactive"
+                                     Color="{DynamicResource UiWindowBackgroundColorInactive}" />
+                    <SolidColorBrush x:Key="UiWindowBackgroundBrushActive"
+                                     Color="{DynamicResource UiWindowBackgroundColorActive}" />
+
+                    <SolidColorBrush x:Key="UiControlBorderBrushBase"
+                                     Color="{DynamicResource UiControlBorderColorBase}" />
+                    <SolidColorBrush x:Key="UiControlBackgroundBrushBase"
+                                     Color="{DynamicResource UiControlBackgroundColorBase}" />
+                    <SolidColorBrush x:Key="UiControlBackgroundBrushBasePointerOver"
+                                     Color="{DynamicResource UiControlBackgroundColorBasePointerOver}" />
+
+                    <SolidColorBrush x:Key="UiControlBorderBrushHigh"
+                                     Color="{DynamicResource UiControlBorderColorHigh}" />
+                    <SolidColorBrush x:Key="UiControlBackgroundBrushHigh"
+                                     Color="{DynamicResource UiControlBackgroundColorHigh}" />
+
+                    <SolidColorBrush x:Key="UiControlBackgroundBrushHighest"
+                                     Color="{DynamicResource UiControlBackgroundColorHighest}" />
+
+                    <SolidColorBrush x:Key="UiExpanderBorderBrush" Color="{DynamicResource UiExpanderBorderColor}" />
+
+                    <SolidColorBrush x:Key="UiOverlayBackgroundBrush" Color="{DynamicResource UiOverlayBackground}" />
+                </ResourceDictionary>
+
+            </ResourceDictionary.MergedDictionaries>
+
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <Style Selector=":is(Window)">
+            <Setter Property="TransparencyLevelHint" Value="Mica" />
+        </Style>
+        <Style Selector=":is(Window)">
+            <Setter Property="Background" Value="{DynamicResource UiWindowBackgroundBrushInactive}" />
+        </Style>
+
+        <Style Selector=":is(Window)[ActualTransparencyLevel=Mica][IsActive=True]">
+            <Setter Property="Background" Value="{DynamicResource UiWindowBackgroundBrushActive}" />
+        </Style>
+
+        <Style Selector="Border.setting">
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource UiControlBackgroundBrushBase}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource UiControlBorderBrushBase}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <Style Selector="Button.setting">
+            <Setter Property="Background" Value="{DynamicResource UiControlBackgroundBrushHigh}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource UiControlBorderBrushHigh}" />
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource UiControlBackgroundBrushHigh}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource UiControlBorderBrushHigh}" />
+            </Style>
+
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <BrushTransition Property="Background" Duration="0:0:0.2" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="Background" Value="{DynamicResource UiControlBackgroundBrushHighest}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource UiControlBackgroundBrushHighest}" />
+            </Style>
+        </Style>
+    </Application.Styles>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="{Binding ProcessManager.IsRunning, Converter={StaticResource BooleanToIconConverter}}"
+                      ToolTipText="{x:Static core:Constants.Title}"
+                      Clicked="TrayIconClicked"
+                      IsVisible="{Binding ., Converter={StaticResource DataContextToBoolean}}">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="{Binding ProcessManager.IsRunning, Converter={StaticResource BooleanToStartStopConverter}}"
+                                        Command="{Binding ToggleCommand}" />
+                        <NativeMenuItem Header="Settings" Click="SettingsOnClick" />
+                        <NativeMenuItem Header="Exit" Click="ExitOnClick" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodByeDPI.Core", "GoodByeDPI.Core\GoodByeDPI.Core.csproj", "{DF732EE5-CB0C-4E80-8345-EBC58ECCB878}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodByeDPI.UI", "GoodByeDPI.UI\GoodByeDPI.UI.csproj", "{3365B7EA-66E9-4620-AD18-185F25C7383B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF732EE5-CB0C-4E80-8345-EBC58ECCB878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF732EE5-CB0C-4E80-8345-EBC58ECCB878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF732EE5-CB0C-4E80-8345-EBC58ECCB878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF732EE5-CB0C-4E80-8345-EBC58ECCB878}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3365B7EA-66E9-4620-AD18-185F25C7383B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3365B7EA-66E9-4620-AD18-185F25C7383B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3365B7EA-66E9-4620-AD18-185F25C7383B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3365B7EA-66E9-4620-AD18-185F25C7383B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

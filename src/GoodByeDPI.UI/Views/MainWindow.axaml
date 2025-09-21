@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GoodByeDPI.Core.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:core="clr-namespace:GoodByeDPI.Core;assembly=GoodByeDPI.Core"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="GoodByeDPI.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        MinWidth="550" MinHeight="400"
+        Width="550" Height="400"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/icon.ico"
+        Title="{x:Static core:Constants.Title}"
+        TransparencyLevelHint="Mica">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid VerticalAlignment="Stretch"
+          RowDefinitions="*, Auto">
+        <Panel Grid.Row="0"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch">
+            <ToggleButton VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          HorizontalContentAlignment="Center"
+                          VerticalContentAlignment="Center"
+                          FontSize="32"
+                          MinHeight="100"
+                          MinWidth="130"
+                          CornerRadius="25"
+                          Padding="25"
+                          IsChecked="{Binding ProcessManager.IsRunning, Mode=OneWay}"
+                          Command="{Binding ToggleCommand}"
+                          Content="{Binding ProcessManager.IsRunning, Converter={StaticResource BooleanToStartStopConverter}}" />
+        </Panel>
+
+
+        <StackPanel Grid.Row="1"
+                    VerticalAlignment="Bottom"
+                    Spacing="5"
+                    Margin="10">
+            <TextBox Watermark="Executable Path"
+                     Text="{Binding ExecutablePath}" />
+            <TextBox Watermark="Command Line Arguments"
+                     Text="{Binding CommandLineArguments}" />
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="5"
+                        HorizontalAlignment="Right">
+                <Button Content="Reset"
+                        Command="{Binding ResetCommand}"
+                        IsEnabled="{Binding SettingsChanged}" />
+                <Button Content="Apply"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding SettingsChanged}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
