@@ -35,6 +35,8 @@ public partial class App : Application
                 return;
             }
 
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
             IServiceCollection collection = new ServiceCollection();
             collection.AddSingleton(typeof(IArgsProvider), new ArgsProvider(desktop.Args));
             collection.AddSingleton(typeof(IMessageBoxService), new MessageBoxService(desktop));
