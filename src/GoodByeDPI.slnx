@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GoodByeDPI.Avalonia/GoodByeDPI.Avalonia.csproj" />
+  <Project Path="GoodByeDPI.Core/GoodByeDPI.Core.csproj" />
+</Solution>
