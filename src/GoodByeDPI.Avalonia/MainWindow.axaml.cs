@@ -1,6 +1,6 @@
-using SukiUI.Controls;
+﻿using SukiUI.Controls;
 
-namespace GoodByeDPI.Avalonia.Views;
+namespace GoodByeDPI.Avalonia;
 
 public partial class MainWindow : SukiWindow
 {
