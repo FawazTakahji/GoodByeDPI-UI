@@ -1,9 +1,14 @@
-﻿<sukiUi:SukiWindow xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="GoodByeDPI.Avalonia.MainWindow"
-        Title="GoodByeDPI UI">
+﻿<sukiUi:SukiWindow x:Class="GoodByeDPI.Avalonia.MainWindow"
+                   xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:navigation="clr-namespace:GoodByeDPI.Core.Navigation;assembly=GoodByeDPI.Core"
+                   xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                   Title="GoodByeDPI UI"
+                   d:DesignHeight="450"
+                   d:DesignWidth="800"
+                   x:DataType="navigation:NavigationService"
+                   mc:Ignorable="d">
+    <sukiUi:SukiTransitioningContentControl Content="{Binding Current}" />
 </sukiUi:SukiWindow>

@@ -2,7 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GoodByeDPI.Avalonia.Views;
+using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.Services;
 using GoodByeDPI.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,13 +24,14 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            NavigationService navigation = services.GetRequiredService<NavigationService>();
+
             desktop.MainWindow = new MainWindow
             {
-                Content = new MainView
-                {
-                    DataContext = services.GetRequiredService<MainViewModel>()
-                }
+                DataContext = navigation
             };
+
+            navigation.NavigateTo<MainViewModel>();
         }
 
         base.OnFrameworkInitializationCompleted();

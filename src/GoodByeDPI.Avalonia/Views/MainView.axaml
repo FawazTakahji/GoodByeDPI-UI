@@ -6,9 +6,17 @@
              xmlns:vm="using:GoodByeDPI.Core.ViewModels"
              d:DesignHeight="450"
              d:DesignWidth="800"
+             x:DataType="vm:MainViewModel"
              mc:Ignorable="d">
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
-    Main
+
+    <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Vertical">
+        <TextBlock Text="Main" />
+        <Button Command="{Binding GoToSettingsCommand}"
+                Content="Settings" />
+    </StackPanel>
 </UserControl>
