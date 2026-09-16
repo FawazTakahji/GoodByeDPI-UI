@@ -1,6 +1,7 @@
 using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using ZLogger;
 
 namespace GoodByeDPI.Core.Services;
 
@@ -10,7 +11,15 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<NavigationService>()
             .AddSingleton<MainViewModel>()
-            .AddSingleton<SettingsViewModel>();
+            .AddSingleton<SettingsViewModel>()
+            .AddLogging(logging =>
+            {
+                logging.AddZLoggerFile(
+                    Path.Combine(
+                        Path.GetTempPath(),
+                        $"GoodByeDPIUI_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.log"),
+                    o => o.UseJsonFormatter());
+            });
 
         return services;
     }
