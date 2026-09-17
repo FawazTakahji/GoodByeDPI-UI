@@ -5,6 +5,7 @@
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                    xmlns:navigation="clr-namespace:GoodByeDPI.Core.Navigation;assembly=GoodByeDPI.Core"
                    xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                   xmlns:ui="clr-namespace:GoodByeDPI.Avalonia"
                    Title="GoodByeDPI UI"
                    Width="400"
                    Height="430"
@@ -18,5 +19,9 @@
                    CanMinimize="False"
                    CanPin="False"
                    mc:Ignorable="d">
+    <Design.DataContext>
+        <ui:DesignServiceLocator Type="navigation:NavigationService" />
+    </Design.DataContext>
+
     <sukiUi:SukiTransitioningContentControl Content="{Binding Current}" />
 </sukiUi:SukiWindow>
