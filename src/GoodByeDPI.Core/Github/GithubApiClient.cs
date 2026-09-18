@@ -45,4 +45,14 @@ public class GithubApiClient
         Release? release = await JsonSerializer.DeserializeAsync<Release>(response, cancellationToken: ct);
         return release ?? throw new InvalidOperationException("No release found.");
     }
+
+    public async Task DownloadAssetAsync(string url, string destination, CancellationToken ct = default)
+    {
+        using HttpResponseMessage response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+        response.EnsureSuccessStatusCode();
+
+        await using Stream source = await response.Content.ReadAsStreamAsync(ct);
+        await using FileStream target = File.Create(destination);
+        await source.CopyToAsync(target, ct);
+    }
 }

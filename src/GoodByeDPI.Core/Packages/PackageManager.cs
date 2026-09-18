@@ -1,0 +1,142 @@
+﻿using System.IO.Compression;
+using System.Runtime.InteropServices;
+using GoodByeDPI.Core.Github;
+using Microsoft.Extensions.Logging;
+
+namespace GoodByeDPI.Core.Packages;
+
+public class PackageManager
+{
+    private string PackagesPath { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "packages");
+    private readonly ILogger<PackageManager> _logger;
+    private readonly GithubApiClient _client;
+    private readonly SemaphoreSlim _downloadLock = new(1, 1);
+
+    public PackageManager(ILogger<PackageManager> logger, GithubApiClient client)
+    {
+        _logger = logger;
+        _client = client;
+    }
+
+    public async Task<string> GetOrDownloadLatestAsync(CancellationToken ct = default)
+    {
+        Release release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
+        string exePath = Path.Combine(PackagesPath, release.TagName, "goodbyedpi.exe");
+
+        await _downloadLock.WaitAsync(ct);
+
+        try
+        {
+            if (File.Exists(exePath))
+            {
+                _logger.LogInformation("Package {Tag} already installed, skipping download", release.TagName);
+            }
+            else
+            {
+                await InstallAsync(release, ct);
+            }
+
+            DeleteOldVersions(release.TagName);
+            return exePath;
+        }
+        finally
+        {
+            _downloadLock.Release();
+        }
+    }
+
+    private async Task InstallAsync(Release release, CancellationToken ct)
+    {
+        Asset? zip = release.Assets.FirstOrDefault(a => a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+        if (zip is null)
+        {
+            throw new InvalidOperationException($"Release {release.TagName} has no zip asset.");
+        }
+
+        _logger.LogInformation("Downloading {Url}", zip.BrowserDownloadUrl);
+        Directory.CreateDirectory(PackagesPath);
+
+        string tagDir = Path.Combine(PackagesPath, release.TagName);
+        string tempZip = Path.Combine(PackagesPath, $".tmp-{release.TagName}.zip");
+        string tempDir = Path.Combine(PackagesPath, $".tmp-{release.TagName}");
+        string arch = RuntimeInformation.OSArchitecture == Architecture.X64 ? "x86_64" : "x86";
+
+        try
+        {
+            await _client.DownloadAssetAsync(zip.BrowserDownloadUrl, tempZip, ct);
+
+            Directory.CreateDirectory(tempDir);
+            await ZipFile.ExtractToDirectoryAsync(tempZip, tempDir, ct);
+
+            string? archDir = Directory
+                .EnumerateDirectories(tempDir, "*", SearchOption.AllDirectories)
+                .FirstOrDefault(d => string.Equals(Path.GetFileName(d), arch, StringComparison.OrdinalIgnoreCase)
+                                  && File.Exists(Path.Combine(d, "goodbyedpi.exe")));
+            if (archDir is null)
+            {
+                throw new InvalidOperationException($"Archive for {release.TagName} has no {arch} folder.");
+            }
+
+            if (Directory.Exists(tagDir))
+            {
+                Directory.Delete(tagDir, true);
+            }
+            Directory.Move(archDir, tagDir);
+
+            _logger.LogInformation("Installed {Tag} to {Path}", release.TagName, tagDir);
+        }
+        finally
+        {
+            try
+            {
+                if (File.Exists(tempZip))
+                {
+                    File.Delete(tempZip);
+                }
+
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to clean up temporary files for {Tag}", release.TagName);
+            }
+        }
+    }
+
+    private void DeleteOldVersions(string keepTag)
+    {
+        foreach (string directory in Directory.EnumerateDirectories(PackagesPath))
+        {
+            if (string.Equals(Path.GetFileName(directory), keepTag, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            _logger.LogInformation("Removing old package {Directory}", directory);
+            try
+            {
+                Directory.Delete(directory, true);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to remove old package {Directory}", directory);
+            }
+        }
+
+        foreach (string zip in Directory.EnumerateFiles(PackagesPath, "*.zip"))
+        {
+            _logger.LogInformation("Removing leftover download {Zip}", zip);
+            try
+            {
+                File.Delete(zip);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to remove leftover download {Zip}", zip);
+            }
+        }
+    }
+}
