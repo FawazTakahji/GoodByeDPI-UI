@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<NavigationService>()
             .AddSingleton<PackageManager>()
             .AddSingleton<MainViewModel>()
+            .AddSingleton<HomeViewModel>()
             .AddSingleton<SettingsViewModel>()
             .AddLogging(logging =>
             {

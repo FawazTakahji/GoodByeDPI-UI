@@ -5,7 +5,7 @@ namespace GoodByeDPI.Core.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase, INavigable
 {
-    private NavigationService _navigation;
+    private readonly NavigationService _navigation;
 
     public SettingsViewModel(NavigationService navigation)
     {
@@ -15,6 +15,6 @@ public partial class SettingsViewModel : ViewModelBase, INavigable
     [RelayCommand]
     private void GoMain()
     {
-        _navigation.NavigateTo<MainViewModel>();
+        _navigation.NavigateTo<HomeViewModel>();
     }
 }

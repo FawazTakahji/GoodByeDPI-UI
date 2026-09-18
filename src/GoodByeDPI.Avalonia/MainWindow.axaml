@@ -3,9 +3,7 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                   xmlns:navigation="clr-namespace:GoodByeDPI.Core.Navigation;assembly=GoodByeDPI.Core"
                    xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
-                   xmlns:ui="clr-namespace:GoodByeDPI.Avalonia"
                    Title="GoodByeDPI UI"
                    Width="400"
                    Height="430"
@@ -13,15 +11,10 @@
                    MinHeight="430"
                    d:DesignHeight="450"
                    d:DesignWidth="800"
-                   x:DataType="navigation:NavigationService"
                    CanFullScreen="False"
                    CanMaximize="False"
                    CanMinimize="False"
                    CanPin="False"
                    mc:Ignorable="d">
-    <Design.DataContext>
-        <ui:DesignServiceLocator Type="navigation:NavigationService" />
-    </Design.DataContext>
-
-    <sukiUi:SukiTransitioningContentControl Content="{Binding Current}" />
+    Placeholder
 </sukiUi:SukiWindow>

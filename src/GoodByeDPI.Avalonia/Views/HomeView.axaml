@@ -1,0 +1,50 @@
+<UserControl x:Class="GoodByeDPI.Avalonia.Views.HomeView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="clr-namespace:GoodByeDPI.Avalonia"
+             xmlns:vm="using:GoodByeDPI.Core.ViewModels"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             x:DataType="vm:HomeViewModel"
+             mc:Ignorable="d">
+    <Design.DataContext>
+        <ui:DesignServiceLocator Type="vm:HomeViewModel" />
+    </Design.DataContext>
+
+    <Panel Margin="48,32">
+        <Panel Width="216"
+               Height="216">
+            <Border Background="{DynamicResource SukiPrimaryColor10}"
+                    CornerRadius="108" />
+            <Border Margin="14"
+                    Background="{DynamicResource SukiPrimaryColor20}"
+                    CornerRadius="108" />
+            <Border Margin="28"
+                    BorderBrush="{DynamicResource SukiPrimaryColor75}"
+                    BorderThickness="2"
+                    CornerRadius="108" />
+            <Border Width="150"
+                    Height="150"
+                    Background="{DynamicResource SukiPrimaryColor}"
+                    CornerRadius="75"
+                    Cursor="Hand">
+                <Path Width="58"
+                      Height="58"
+                      Data="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C18.05,7.78 19,9.79 19,12A7,7 0 0,1 12,19A7,7 0 0,1 5,12C5,9.79 5.95,7.78 7.59,6.59L6.17,5.17C4.23,6.82 3,9.26 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12C21,9.26 19.77,6.82 17.83,5.17Z"
+                      Fill="White"
+                      Stretch="Uniform" />
+            </Border>
+        </Panel>
+
+        <Button HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Classes="Basic"
+                Command="{Binding GoToSettingsCommand}"
+                Content="Settings"
+                Cursor="Hand"
+                FontSize="20"
+                Foreground="{DynamicResource SukiMuteText}" />
+    </Panel>
+</UserControl>

@@ -1,20 +1,13 @@
-using CommunityToolkit.Mvvm.Input;
 using GoodByeDPI.Core.Navigation;
 
 namespace GoodByeDPI.Core.ViewModels;
 
-public partial class MainViewModel : ViewModelBase, INavigable
+public partial class MainViewModel : ViewModelBase
 {
-    private NavigationService _navigation;
+    public NavigationService Navigation { get; }
 
-    public MainViewModel(NavigationService navigationService)
+    public MainViewModel(NavigationService navigation)
     {
-        _navigation = navigationService;
-    }
-
-    [RelayCommand]
-    private void GoToSettings()
-    {
-        _navigation.NavigateTo<SettingsViewModel>();
+        Navigation = navigation;
     }
 }
