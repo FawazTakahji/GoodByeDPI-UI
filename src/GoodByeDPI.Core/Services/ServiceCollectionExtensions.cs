@@ -1,3 +1,4 @@
+using GoodByeDPI.Core.Github;
 using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ public static class ServiceCollectionExtensions
                         $"GoodByeDPIUI_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.log"),
                     o => o.UseJsonFormatter());
             });
+
+        GithubApiClient.Register(services);
 
         return services;
     }
