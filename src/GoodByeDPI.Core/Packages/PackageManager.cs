@@ -1,7 +1,9 @@
 ﻿using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using GoodByeDPI.Core.Github;
 using Microsoft.Extensions.Logging;
+using NuGet.Versioning;
 
 namespace GoodByeDPI.Core.Packages;
 
@@ -20,7 +22,23 @@ public class PackageManager
 
     public async Task<string> GetOrDownloadLatestAsync(CancellationToken ct = default)
     {
-        Release release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
+        Release release;
+        try
+        {
+            release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Could not check GitHub for the latest release, falling back to local package");
+            string? localExe = GetLatestLocalVersion();
+            if (localExe is not null)
+            {
+                return localExe;
+            }
+
+            throw;
+        }
+
         string exePath = Path.Combine(PackagesPath, release.TagName, "goodbyedpi.exe");
 
         await _downloadLock.WaitAsync(ct);
@@ -104,6 +122,49 @@ public class PackageManager
                 _logger.LogWarning(e, "Failed to clean up temporary files for {Tag}", release.TagName);
             }
         }
+    }
+
+    private string? GetLatestLocalVersion()
+    {
+        if (!Directory.Exists(PackagesPath))
+        {
+            return null;
+        }
+
+        NuGetVersion? latest = null;
+        string? latestExe = null;
+        foreach (string directory in Directory.EnumerateDirectories(PackagesPath))
+        {
+            string name = Path.GetFileName(directory);
+            string exe = Path.Combine(directory, "goodbyedpi.exe");
+            if (name.StartsWith(".tmp-", StringComparison.Ordinal) || !File.Exists(exe))
+            {
+                continue;
+            }
+
+            string tag = NormalizeTag(name);
+            if (NuGetVersion.TryParse(tag, out NuGetVersion? version) && (latest is null || version > latest))
+            {
+                latest = version;
+                latestExe = exe;
+            }
+        }
+
+        return latestExe;
+    }
+
+    private static string NormalizeTag(string tag)
+    {
+        // e.g. "0.2.3rc3" -> "0.2.3-rc3", "0.2.0a" -> "0.2.0-a"
+        Match match = Regex.Match(tag, @"^(?<ver>\d+\.\d+(?:\.\d+)?)(?<pre>[a-zA-Z].*)?$");
+        if (match.Success)
+        {
+            string ver = match.Groups["ver"].Value;
+            string pre = match.Groups["pre"].Value;
+            return pre.Length > 0 ? $"{ver}-{pre}" : ver;
+        }
+
+        return tag;
     }
 
     private void DeleteOldVersions(string keepTag)
