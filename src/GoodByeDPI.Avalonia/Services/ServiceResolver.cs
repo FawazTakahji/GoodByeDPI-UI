@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GoodByeDPI.Avalonia;
+namespace GoodByeDPI.Avalonia.Services;
 
-public class DesignServiceLocator : MarkupExtension
+public class ServiceResolver : MarkupExtension
 {
     public required Type Type { get; set; }
 
