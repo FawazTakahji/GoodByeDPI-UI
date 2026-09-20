@@ -18,7 +18,7 @@
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="SukiUI" Version="7.0.2-nightly20260910.453" />
+        <PackageReference Include="SukiUI" Version="7.0.2-nightly20260918.461" />
     </ItemGroup>
 
     <ItemGroup>

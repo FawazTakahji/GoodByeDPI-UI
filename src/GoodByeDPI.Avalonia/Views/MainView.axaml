@@ -6,6 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:services="clr-namespace:GoodByeDPI.Avalonia.Services"
              xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:toasts="clr-namespace:SukiUI.Toasts;assembly=SukiUI"
              xmlns:vm="using:GoodByeDPI.Core.ViewModels"
              d:DesignHeight="450"
              d:DesignWidth="800"
@@ -15,5 +16,6 @@
     <Panel>
         <sukiUi:SukiTransitioningContentControl Content="{Binding Navigation.Current}" />
         <sukiUi:SukiDialogHost Manager="{services:ServiceResolver Type=dialogs:ISukiDialogManager}" />
+        <sukiUi:SukiToastHost Manager="{services:ServiceResolver Type=toasts:ISukiToastManager}" />
     </Panel>
 </UserControl>

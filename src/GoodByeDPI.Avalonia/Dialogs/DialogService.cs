@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using GoodByeDPI.Core.Dialogs;
 using SukiUI.Dialogs;
@@ -81,7 +80,7 @@ public class DialogService : IDialogService
 
         if (dialog.Kind != NotificationKind.None)
         {
-            builder = builder.OfType(MapKind(dialog.Kind));
+            builder = builder.OfType(NotificationTypeMapper.Map(dialog.Kind));
         }
 
         if (dialog.Dismissible)
@@ -129,17 +128,5 @@ public class DialogService : IDialogService
                 yield return ("Cancel", DialogResult.Cancel);
                 break;
         }
-    }
-
-    private static NotificationType MapKind(NotificationKind kind)
-    {
-        return kind switch
-        {
-            NotificationKind.Information => NotificationType.Information,
-            NotificationKind.Success => NotificationType.Success,
-            NotificationKind.Warning => NotificationType.Warning,
-            NotificationKind.Error => NotificationType.Error,
-            _ => NotificationType.Information,
-        };
     }
 }
