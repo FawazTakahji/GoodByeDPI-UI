@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using GoodByeDPI.Avalonia.Views;
 using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.ViewModels;
+using SukiUI.Dialogs;
 
 namespace GoodByeDPI.Avalonia;
 
@@ -25,7 +26,11 @@ public partial class App : Application
             {
                 Content = new MainView
                 {
-                    DataContext = DataContext = Ioc.Default.GetRequiredService<MainViewModel>()
+                    DataContext = Ioc.Default.GetRequiredService<MainViewModel>(),
+                    DialogHost =
+                    {
+                        Manager = Ioc.Default.GetRequiredService<ISukiDialogManager>()
+                    }
                 }
             };
         }

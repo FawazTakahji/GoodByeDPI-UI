@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using GoodByeDPI.Avalonia.Services;
 using GoodByeDPI.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,7 @@ sealed class Program
         Ioc.Default.ConfigureServices(
             new ServiceCollection()
                 .AddCoreServices()
+                .AddUiServices()
                 .BuildServiceProvider());
 
         return AppBuilder.Configure<App>()
