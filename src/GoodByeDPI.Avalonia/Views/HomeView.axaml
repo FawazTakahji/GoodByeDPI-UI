@@ -25,11 +25,13 @@
                     BorderBrush="{DynamicResource SukiPrimaryColor75}"
                     BorderThickness="2"
                     CornerRadius="108" />
-            <Border Width="150"
+            <Border x:Name="PowerButton"
+                    Width="150"
                     Height="150"
                     Background="{DynamicResource SukiPrimaryColor}"
                     CornerRadius="75"
-                    Cursor="Hand">
+                    Cursor="Hand"
+                    Tapped="OnPowerTapped">
                 <Path Width="58"
                       Height="58"
                       Data="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C18.05,7.78 19,9.79 19,12A7,7 0 0,1 12,19A7,7 0 0,1 5,12C5,9.79 5.95,7.78 7.59,6.59L6.17,5.17C4.23,6.82 3,9.26 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12C21,9.26 19.77,6.82 17.83,5.17Z"

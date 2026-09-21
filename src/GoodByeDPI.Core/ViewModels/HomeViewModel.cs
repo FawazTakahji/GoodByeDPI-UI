@@ -1,15 +1,63 @@
 using CommunityToolkit.Mvvm.Input;
+using GoodByeDPI.Core.Dialogs;
 using GoodByeDPI.Core.Navigation;
+using GoodByeDPI.Core.Packages;
 
 namespace GoodByeDPI.Core.ViewModels;
 
 public partial class HomeViewModel : ViewModelBase, INavigable
 {
     private readonly NavigationService _navigation;
+    private readonly IDialogService _dialogs;
+    private readonly IToastService _toasts;
+    private readonly PackageManager _packages;
 
-    public HomeViewModel(NavigationService navigationService)
+    public HomeViewModel(NavigationService navigationService, IDialogService dialogs, IToastService toasts, PackageManager packages)
     {
         _navigation = navigationService;
+        _dialogs = dialogs;
+        _toasts = toasts;
+        _packages = packages;
+    }
+
+    [RelayCommand]
+    private async Task Start()
+    {
+        DownloadResult result;
+        try
+        {
+            IToastHandle loading = _toasts.ShowLoading("GoodbyeDPI", "Preparing package…");
+            try
+            {
+                result = await _packages.DownloadLatestAsync();
+            }
+            finally
+            {
+                loading.Dismiss();
+            }
+        }
+        catch
+        {
+            _toasts.Show("Couldn't download GoodbyeDPI", "Checking for a local copy…", NotificationKind.Warning);
+
+            string? localExe = _packages.GetLatestLocalVersion();
+            if (localExe is null)
+            {
+                await _dialogs.ShowModal(
+                    "Can't start GoodbyeDPI",
+                    "The package couldn't be downloaded and no local copy was found. Check your connection and try again.",
+                    kind: NotificationKind.Error);
+                return;
+            }
+
+            _toasts.Show("GoodbyeDPI ready", $"Using local package {PackageTag(localExe)}", NotificationKind.Success);
+            return;
+        }
+
+        if (result.DownloadedNow)
+        {
+            _toasts.Show("GoodbyeDPI ready", $"{PackageTag(result.ExePath)} downloaded and installed.", NotificationKind.Success);
+        }
     }
 
     [RelayCommand]
@@ -17,4 +65,6 @@ public partial class HomeViewModel : ViewModelBase, INavigable
     {
         _navigation.NavigateTo<SettingsViewModel>();
     }
+
+    private static string? PackageTag(string exePath) => Path.GetFileName(Path.GetDirectoryName(exePath));
 }

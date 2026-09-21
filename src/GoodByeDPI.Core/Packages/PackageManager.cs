@@ -7,6 +7,8 @@ using NuGet.Versioning;
 
 namespace GoodByeDPI.Core.Packages;
 
+public record DownloadResult(string ExePath, bool DownloadedNow);
+
 public class PackageManager
 {
     private string PackagesPath { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "packages");
@@ -20,42 +22,27 @@ public class PackageManager
         _client = client;
     }
 
-    public async Task<string> GetOrDownloadLatestAsync(CancellationToken ct = default)
+    public async Task<DownloadResult> DownloadLatestAsync(CancellationToken ct = default)
     {
-        Release release;
-        try
-        {
-            release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Could not check GitHub for the latest release, falling back to local package");
-            string? localExe = GetLatestLocalVersion();
-            if (localExe is not null)
-            {
-                return localExe;
-            }
-
-            throw;
-        }
-
+        Release release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
         string exePath = Path.Combine(PackagesPath, release.TagName, "goodbyedpi.exe");
 
         await _downloadLock.WaitAsync(ct);
 
         try
         {
-            if (File.Exists(exePath))
-            {
-                _logger.LogInformation("Package {Tag} already installed, skipping download", release.TagName);
-            }
-            else
+            bool downloadedNow = !File.Exists(exePath);
+            if (downloadedNow)
             {
                 await InstallAsync(release, ct);
             }
+            else
+            {
+                _logger.LogInformation("Package {Tag} already installed, skipping download", release.TagName);
+            }
 
             DeleteOldVersions(release.TagName);
-            return exePath;
+            return new DownloadResult(exePath, downloadedNow);
         }
         finally
         {
@@ -124,7 +111,7 @@ public class PackageManager
         }
     }
 
-    private string? GetLatestLocalVersion()
+    public string? GetLatestLocalVersion()
     {
         if (!Directory.Exists(PackagesPath))
         {
