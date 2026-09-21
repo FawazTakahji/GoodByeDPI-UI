@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <EmbeddedResource Include="Shaders\**\*.sksl"/>
     </ItemGroup>
 
     <ItemGroup>
