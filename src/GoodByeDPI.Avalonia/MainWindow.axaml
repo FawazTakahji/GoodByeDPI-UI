@@ -11,10 +11,14 @@
                    MinHeight="430"
                    d:DesignHeight="450"
                    d:DesignWidth="800"
+                   BackgroundAnimationEnabled="True"
+                   BackgroundStyle="Bubble"
                    CanFullScreen="False"
                    CanMaximize="False"
                    CanMinimize="False"
                    CanPin="False"
+                   ShowBottomBorder="False"
+                   TitleBarAnimationEnabled="True"
                    mc:Ignorable="d">
     Placeholder
 </sukiUi:SukiWindow>
