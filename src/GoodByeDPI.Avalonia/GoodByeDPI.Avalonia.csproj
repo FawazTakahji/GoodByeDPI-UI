@@ -32,45 +32,14 @@
     <Target Name="GenerateDynamicManifest" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
         <PropertyGroup>
             <GeneratedManifestPath>$(IntermediateOutputPath)dynamic.app.manifest</GeneratedManifestPath>
-        </PropertyGroup>
-
-        <ModifyManifest InputPath="app.manifest" OutputPath="$(GeneratedManifestPath)"/>
-
-        <PropertyGroup>
             <ApplicationManifest>$(GeneratedManifestPath)</ApplicationManifest>
         </PropertyGroup>
+
+        <Copy SourceFiles="app.manifest" DestinationFiles="$(GeneratedManifestPath)" SkipUnchangedFiles="true"/>
+
+        <XmlPoke XmlInputPath="$(GeneratedManifestPath)"
+                 Query="/asm1:assembly/asm3:trustInfo/asm3:security/asm3:requestedPrivileges/asm3:requestedExecutionLevel/@level"
+                 Value="requireAdministrator"
+                 Namespaces="&lt;Namespace Prefix='asm1' Uri='urn:schemas-microsoft-com:asm.v1'/&gt;&lt;Namespace Prefix='asm3' Uri='urn:schemas-microsoft-com:asm.v3'/&gt;"/>
     </Target>
-
-    <UsingTask TaskName="ModifyManifest" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-        <ParameterGroup>
-            <InputPath ParameterType="System.String" Required="true"/>
-            <OutputPath ParameterType="System.String" Required="true"/>
-        </ParameterGroup>
-        <Task>
-            <Using Namespace="System.IO"/>
-            <Using Namespace="System.Xml"/>
-            <Code Type="Fragment" Language="cs">
-                <![CDATA[
-                    XmlDocument doc = new XmlDocument();
-                    doc.Load(InputPath);
-
-                    XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
-                    nsmgr.AddNamespace("asmv3", "urn:schemas-microsoft-com:asm.v3");
-
-                    XmlNode node = doc.SelectSingleNode("//asmv3:requestedExecutionLevel", nsmgr);
-                    if (node != null)
-                    {
-                        node.Attributes["level"].Value = "requireAdministrator";
-                    }
-
-                    string dir = Path.GetDirectoryName(OutputPath);
-                    if (!string.IsNullOrEmpty(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-                    doc.Save(OutputPath);
-                ]]>
-            </Code>
-        </Task>
-    </UsingTask>
 </Project>
