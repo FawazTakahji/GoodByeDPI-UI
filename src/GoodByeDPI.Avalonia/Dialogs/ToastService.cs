@@ -1,4 +1,5 @@
 using System;
+using Avalonia.Threading;
 using GoodByeDPI.Core.Dialogs;
 using SukiUI.Toasts;
 
@@ -21,18 +22,21 @@ public class ToastService : IToastService
         TimeSpan? duration = null,
         bool dismissibleByClick = true)
     {
-        SukiToastBuilder builder = _manager.CreateToast()
-            .WithTitle(title ?? string.Empty)
-            .WithContent(message ?? string.Empty)
-            .OfType(NotificationTypeMapper.Map(kind))
-            .Dismiss().After(duration ?? DefaultDuration);
-
-        if (dismissibleByClick)
+        Dispatcher.UIThread.Post(() =>
         {
-            builder = builder.Dismiss().ByClicking();
-        }
+            SukiToastBuilder builder = _manager.CreateToast()
+                .WithTitle(title ?? string.Empty)
+                .WithContent(message ?? string.Empty)
+                .OfType(NotificationTypeMapper.Map(kind))
+                .Dismiss().After(duration ?? DefaultDuration);
 
-        builder.Queue();
+            if (dismissibleByClick)
+            {
+                builder = builder.Dismiss().ByClicking();
+            }
+
+            builder.Queue();
+        });
     }
 
     public IToastHandle ShowAction(
@@ -41,37 +45,47 @@ public class ToastService : IToastService
         Action? onBodyClick = null,
         params ToastAction[] actions)
     {
-        SukiToastBuilder builder = _manager.CreateToast()
-            .WithTitle(title ?? string.Empty)
-            .WithContent(message ?? string.Empty);
-
-        if (onBodyClick is not null)
+        IToastHandle handle = null!;
+        Dispatcher.UIThread.Post(() =>
         {
-            builder = builder.OnClicked(_ => onBodyClick());
-        }
+            SukiToastBuilder builder = _manager.CreateToast()
+                .WithTitle(title ?? string.Empty)
+                .WithContent(message ?? string.Empty);
 
-        foreach (ToastAction action in actions)
-        {
-            builder = builder.WithActionButton(action.Label, _ => action.OnClick?.Invoke(), action.DismissOnClick);
-        }
+            if (onBodyClick is not null)
+            {
+                builder = builder.OnClicked(_ => onBodyClick());
+            }
 
-        ISukiToast toast = builder.Queue();
-        return new ToastHandle(toast, () => _manager.Dismiss(toast));
+            foreach (ToastAction action in actions)
+            {
+                builder = builder.WithActionButton(action.Label, _ => action.OnClick?.Invoke(), action.DismissOnClick);
+            }
+
+            ISukiToast toast = builder.Queue();
+            handle = new ToastHandle(toast, () => _manager.Dismiss(toast));
+        });
+        return handle;
     }
 
     public IToastHandle ShowLoading(string? title, string? message = null, TimeSpan? duration = null)
     {
-        SukiToastBuilder builder = _manager.CreateToast()
-            .WithTitle(title ?? string.Empty)
-            .WithContent(message ?? string.Empty)
-            .WithLoadingState(true);
-
-        if (duration is not null)
+        IToastHandle handle = null!;
+        Dispatcher.UIThread.Post(() =>
         {
-            builder = builder.Dismiss().After(duration.Value);
-        }
+            SukiToastBuilder builder = _manager.CreateToast()
+                .WithTitle(title ?? string.Empty)
+                .WithContent(message ?? string.Empty)
+                .WithLoadingState(true);
 
-        ISukiToast toast = builder.Queue();
-        return new ToastHandle(toast, () => _manager.Dismiss(toast));
+            if (duration is not null)
+            {
+                builder = builder.Dismiss().After(duration.Value);
+            }
+
+            ISukiToast toast = builder.Queue();
+            handle = new ToastHandle(toast, () => _manager.Dismiss(toast));
+        });
+        return handle;
     }
 }

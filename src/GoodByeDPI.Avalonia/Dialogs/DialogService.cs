@@ -24,15 +24,18 @@ public class DialogService : IDialogService
         NotificationKind kind = NotificationKind.None,
         bool dismissible = true)
     {
-        _queue.Enqueue(new QueuedDialog
+        Dispatcher.UIThread.Post(() =>
         {
-            Title = title,
-            Message = message,
-            Buttons = buttons,
-            Kind = kind,
-            Dismissible = dismissible,
+            _queue.Enqueue(new QueuedDialog
+            {
+                Title = title,
+                Message = message,
+                Buttons = buttons,
+                Kind = kind,
+                Dismissible = dismissible,
+            });
+            TryDequeue();
         });
-        TryDequeue();
     }
 
     public Task<DialogResult> ShowModal(
@@ -43,16 +46,19 @@ public class DialogService : IDialogService
         bool dismissible = true)
     {
         TaskCompletionSource<DialogResult> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        _queue.Enqueue(new QueuedDialog
+        Dispatcher.UIThread.Post(() =>
         {
-            Title = title,
-            Message = message,
-            Buttons = buttons,
-            Kind = kind,
-            Dismissible = dismissible,
-            Completion = completion,
+            _queue.Enqueue(new QueuedDialog
+            {
+                Title = title,
+                Message = message,
+                Buttons = buttons,
+                Kind = kind,
+                Dismissible = dismissible,
+                Completion = completion,
+            });
+            TryDequeue();
         });
-        TryDequeue();
         return completion.Task;
     }
 

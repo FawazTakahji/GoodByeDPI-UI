@@ -1,4 +1,5 @@
 using Avalonia.Media;
+using Avalonia.Threading;
 using GoodByeDPI.Core.Theming;
 using SukiUI;
 using SukiUI.Enums;
@@ -19,6 +20,6 @@ public sealed class ThemeService : IThemeService
             _ => SukiTheme.DefaultColorThemes[SukiColor.Red],
         };
 
-        SukiTheme.GetInstance().ChangeColorTheme(theme);
+        Dispatcher.UIThread.Post(() => SukiTheme.GetInstance().ChangeColorTheme(theme));
     }
 }
