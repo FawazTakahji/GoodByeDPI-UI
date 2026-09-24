@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.ServiceProcess;
+using Microsoft.Extensions.Logging;
 using Microsoft.FSharp.Core;
 using ProcessKit;
 
@@ -106,6 +107,8 @@ public class ProcessManager
             }
         }
 
+        TryUnloadWindivert();
+
         if (process is not null)
         {
             try
@@ -133,6 +136,8 @@ public class ProcessManager
         {
             _logger.LogError(ex, "Error while waiting for GoodbyeDPI process");
         }
+
+        TryUnloadWindivert();
 
         bool unexpectedExit = false;
 
@@ -163,6 +168,29 @@ public class ProcessManager
             }
 
             StateChanged?.Invoke(this, false);
+        }
+    }
+
+    private const string WinDivertServiceName = "windivert";
+
+    private void TryUnloadWindivert()
+    {
+        try
+        {
+            using ServiceController service = new(WinDivertServiceName);
+            if (service.Status != ServiceControllerStatus.Running)
+            {
+                _logger.LogDebug("WinDivert service '{ServiceName}' is {State}; no unload needed", WinDivertServiceName, service.Status);
+                return;
+            }
+
+            _logger.LogInformation("Requesting unload of '{ServiceName}' kernel driver", WinDivertServiceName);
+            service.Stop();
+            _logger.LogInformation("WinDivert kernel driver unload requested");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "WinDivert driver unload cleanup could not complete");
         }
     }
 }
