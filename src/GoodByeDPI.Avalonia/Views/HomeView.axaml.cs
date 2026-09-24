@@ -13,9 +13,9 @@ public partial class HomeView : UserControl
 
     private void OnPowerTapped(object? sender, TappedEventArgs e)
     {
-        if (DataContext is HomeViewModel vm && vm.StartCommand.CanExecute(null))
+        if (DataContext is HomeViewModel vm && vm.ToggleCommand.CanExecute(null))
         {
-            vm.StartCommand.Execute(null);
+            vm.ToggleCommand.Execute(null);
         }
     }
 }
