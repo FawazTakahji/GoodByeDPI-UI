@@ -22,7 +22,7 @@ public class ToastService : IToastService
         TimeSpan? duration = null,
         bool dismissibleByClick = true)
     {
-        Dispatcher.UIThread.Post(() =>
+        Dispatch(() =>
         {
             SukiToastBuilder builder = _manager.CreateToast()
                 .WithTitle(title ?? string.Empty)
@@ -46,7 +46,7 @@ public class ToastService : IToastService
         params ToastAction[] actions)
     {
         IToastHandle handle = null!;
-        Dispatcher.UIThread.Post(() =>
+        Dispatch(() =>
         {
             SukiToastBuilder builder = _manager.CreateToast()
                 .WithTitle(title ?? string.Empty)
@@ -71,7 +71,7 @@ public class ToastService : IToastService
     public IToastHandle ShowLoading(string? title, string? message = null, TimeSpan? duration = null)
     {
         IToastHandle handle = null!;
-        Dispatcher.UIThread.Post(() =>
+        Dispatch(() =>
         {
             SukiToastBuilder builder = _manager.CreateToast()
                 .WithTitle(title ?? string.Empty)
@@ -87,5 +87,17 @@ public class ToastService : IToastService
             handle = new ToastHandle(toast, () => _manager.Dismiss(toast));
         });
         return handle;
+    }
+
+    private static void Dispatch(Action action)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            action();
+        }
+        else
+        {
+            Dispatcher.UIThread.Invoke(action);
+        }
     }
 }
