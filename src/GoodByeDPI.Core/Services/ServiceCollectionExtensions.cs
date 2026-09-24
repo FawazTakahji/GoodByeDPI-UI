@@ -1,6 +1,7 @@
 using GoodByeDPI.Core.Github;
 using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.Packages;
+using GoodByeDPI.Core.Processes;
 using GoodByeDPI.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using ZLogger;
@@ -13,6 +14,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<NavigationService>()
             .AddSingleton<PackageManager>()
+            .AddSingleton<ProcessManager>()
             .AddSingleton<MainViewModel>()
             .AddSingleton<HomeViewModel>()
             .AddSingleton<SettingsViewModel>()

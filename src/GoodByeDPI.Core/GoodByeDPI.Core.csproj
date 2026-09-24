@@ -11,6 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
         <PackageReference Include="NuGet.Versioning" Version="7.9.0" />
+        <PackageReference Include="ProcessKit" Version="2.12.0" />
         <PackageReference Include="ZLogger" Version="2.5.10" />
     </ItemGroup>
 
