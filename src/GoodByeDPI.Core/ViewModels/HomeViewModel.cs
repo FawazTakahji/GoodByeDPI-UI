@@ -17,6 +17,8 @@ public partial class HomeViewModel : ViewModelBase, INavigable
     private readonly IThemeService _theme;
     private readonly ProcessManager _process;
 
+    private string? _resolvedExePath;
+
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(ToggleCommand))]
     public partial bool IsRunning { get; set; }
 
@@ -67,39 +69,45 @@ public partial class HomeViewModel : ViewModelBase, INavigable
     private async Task StartAsync()
     {
         IsBusy = true;
-        _theme.SetState(ThemeState.Downloading);
 
-        string? exePath;
+        string? exePath = _resolvedExePath;
         bool downloadedNow = false;
 
-        try
+        if (exePath is null)
         {
-            IToastHandle loading = _toasts.ShowLoading("GoodbyeDPI", "Preparing package…");
+            _theme.SetState(ThemeState.Downloading);
+
             try
             {
-                DownloadResult result = await _packages.DownloadLatestAsync();
-                exePath = result.ExePath;
-                downloadedNow = result.DownloadedNow;
-            }
-            finally
-            {
-                loading.Dismiss();
-            }
-        }
-        catch
-        {
-            _toasts.Show("Couldn't download GoodbyeDPI", "Checking for a local copy…", NotificationKind.Warning);
+                IToastHandle loading = _toasts.ShowLoading("GoodbyeDPI", "Preparing package…");
+                try
+                {
+                    DownloadResult result = await _packages.DownloadLatestAsync();
+                    exePath = result.ExePath;
+                    downloadedNow = result.DownloadedNow;
+                }
+                finally
+                {
+                    loading.Dismiss();
+                }
 
-            exePath = _packages.GetLatestLocalVersion();
-            if (exePath is null)
+                _resolvedExePath = exePath;
+            }
+            catch
             {
-                _theme.SetState(ThemeState.Stopped);
-                await _dialogs.ShowModal(
-                    "Can't start GoodbyeDPI",
-                    "The package couldn't be downloaded and no local copy was found. Check your connection and try again.",
-                    kind: NotificationKind.Error);
-                IsBusy = false;
-                return;
+                _toasts.Show("Couldn't download GoodbyeDPI", "Checking for a local copy…", NotificationKind.Warning);
+
+                exePath = _packages.GetLatestLocalVersion();
+                if (exePath is null)
+                {
+                    _theme.SetState(ThemeState.Stopped);
+                    await _dialogs.ShowModal(
+                        "Can't start GoodbyeDPI",
+                        "The package couldn't be downloaded and no local copy was found. Check your connection and try again.",
+                        kind: NotificationKind.Error);
+                    IsBusy = false;
+                    return;
+                }
             }
         }
 
