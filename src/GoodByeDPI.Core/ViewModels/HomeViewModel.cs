@@ -5,6 +5,7 @@ using GoodByeDPI.Core.Navigation;
 using GoodByeDPI.Core.Packages;
 using GoodByeDPI.Core.Processes;
 using GoodByeDPI.Core.Theming;
+using Microsoft.Extensions.Logging;
 
 namespace GoodByeDPI.Core.ViewModels;
 
@@ -16,6 +17,7 @@ public partial class HomeViewModel : ViewModelBase, INavigable
     private readonly PackageManager _packages;
     private readonly IThemeService _theme;
     private readonly ProcessManager _process;
+    private readonly ILogger<HomeViewModel> _logger;
 
     private string? _resolvedExePath;
 
@@ -31,7 +33,8 @@ public partial class HomeViewModel : ViewModelBase, INavigable
         IToastService toasts,
         PackageManager packages,
         IThemeService theme,
-        ProcessManager process)
+        ProcessManager process,
+        ILogger<HomeViewModel> logger)
     {
         _navigation = navigationService;
         _dialogs = dialogs;
@@ -39,6 +42,7 @@ public partial class HomeViewModel : ViewModelBase, INavigable
         _packages = packages;
         _theme = theme;
         _process = process;
+        _logger = logger;
 
         IsRunning = _process.IsRunning;
         _process.StateChanged += OnProcessStateChanged;
@@ -97,7 +101,7 @@ public partial class HomeViewModel : ViewModelBase, INavigable
             {
                 _toasts.Show("Couldn't download GoodbyeDPI", "Checking for a local copy…", NotificationKind.Warning);
 
-                exePath = _packages.GetLatestLocalVersion();
+                exePath = TryGetLocal();
                 if (exePath is null)
                 {
                     _theme.SetState(ThemeState.Stopped);
@@ -149,6 +153,19 @@ public partial class HomeViewModel : ViewModelBase, INavigable
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private string? TryGetLocal()
+    {
+        try
+        {
+            return _packages.GetLatestLocalVersion();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not enumerate local packages");
+            return null;
         }
     }
 
