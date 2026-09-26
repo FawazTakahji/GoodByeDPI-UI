@@ -4,6 +4,7 @@
         <TargetFramework>net10.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
