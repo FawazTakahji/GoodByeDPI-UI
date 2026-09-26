@@ -12,7 +12,14 @@ public partial class MainWindow : SukiWindow
 
     protected override void OnClosing(WindowClosingEventArgs e)
     {
-        e.Cancel = true;
-        Hide();
+        if (e.CloseReason == WindowCloseReason.WindowClosing)
+        {
+            e.Cancel = true;
+            Hide();
+
+            return;
+        }
+
+        base.OnClosing(e);
     }
 }
