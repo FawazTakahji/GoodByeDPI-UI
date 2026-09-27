@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using GoodByeDPI.Avalonia.Services;
 using GoodByeDPI.Avalonia.Tray;
 using GoodByeDPI.Avalonia.Views;
 using GoodByeDPI.Core.Navigation;
@@ -29,8 +30,10 @@ public partial class App : Application
                 Content = new MainView()
             };
 
+            WindowService.Attach(desktop.MainWindow);
+
             TrayIconService tray = Ioc.Default.GetRequiredService<TrayIconService>();
-            tray.Create(desktop.MainWindow, () => desktop.Shutdown());
+            tray.Create(() => desktop.Shutdown());
 
             desktop.Exit += (_, _) => tray.Dispose();
         }

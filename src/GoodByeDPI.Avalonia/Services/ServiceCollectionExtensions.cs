@@ -2,6 +2,7 @@ using GoodByeDPI.Avalonia.Dialogs;
 using GoodByeDPI.Avalonia.Theming;
 using GoodByeDPI.Avalonia.Tray;
 using GoodByeDPI.Core.Dialogs;
+using GoodByeDPI.Core.Services;
 using GoodByeDPI.Core.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Dialogs;
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ISukiToastManager, SukiToastManager>()
             .AddSingleton<IToastService, ToastService>()
             .AddSingleton<IThemeService, ThemeService>()
+            .AddSingleton<IWindowService, WindowService>()
             .AddSingleton<TrayIconService>();
 
         return services;

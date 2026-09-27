@@ -1,9 +1,9 @@
 using System;
 using System.Drawing;
-using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using GoodByeDPI.Core.Processes;
+using GoodByeDPI.Core.Services;
 using H.NotifyIcon.Core;
 
 namespace GoodByeDPI.Avalonia.Tray;
@@ -11,23 +11,23 @@ namespace GoodByeDPI.Avalonia.Tray;
 public class TrayIconService
 {
     private readonly GoodByeDpiService _service;
+    private readonly IWindowService _window;
 
     private TrayIconWithContextMenu? _trayIcon;
     private Icon? _trayRunningIcon;
     private Icon? _trayOffIcon;
     private PopupMenuItem? _trayToggleItem;
 
-    private Window? _window;
     private Action? _exit;
 
-    public TrayIconService(GoodByeDpiService service)
+    public TrayIconService(GoodByeDpiService service, IWindowService window)
     {
         _service = service;
+        _window = window;
     }
 
-    public void Create(Window window, Action exit)
+    public void Create(Action exit)
     {
-        _window = window;
         _exit = exit;
 
         _trayRunningIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/app.ico")));
@@ -71,7 +71,7 @@ public class TrayIconService
 
     private void OnServiceStateChanged(object? sender, GoodByeDpiStateChangedEventArgs e)
     {
-        Dispatcher.UIThread.Post(() => UpdateTray(e.IsRunning, e.IsBusy));
+        UpdateTray(e.IsRunning, e.IsBusy);
     }
 
     private void UpdateTray(bool isRunning, bool isBusy)
@@ -88,11 +88,6 @@ public class TrayIconService
 
     private void ToggleWindow()
     {
-        if (_window is null)
-        {
-            return;
-        }
-
         if (_window.IsVisible)
         {
             _window.Hide();
@@ -100,7 +95,6 @@ public class TrayIconService
         else
         {
             _window.Show();
-            _window.Activate();
         }
     }
 }
