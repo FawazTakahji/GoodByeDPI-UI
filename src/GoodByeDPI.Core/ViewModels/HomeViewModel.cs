@@ -1,25 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoodByeDPI.Core.Dialogs;
 using GoodByeDPI.Core.Navigation;
-using GoodByeDPI.Core.Packages;
 using GoodByeDPI.Core.Processes;
-using GoodByeDPI.Core.Theming;
-using Microsoft.Extensions.Logging;
 
 namespace GoodByeDPI.Core.ViewModels;
 
 public partial class HomeViewModel : ViewModelBase, INavigable
 {
+    private readonly GoodByeDpiService _service;
     private readonly NavigationService _navigation;
-    private readonly IDialogService _dialogs;
-    private readonly IToastService _toasts;
-    private readonly PackageManager _packages;
-    private readonly IThemeService _theme;
-    private readonly ProcessManager _process;
-    private readonly ILogger<HomeViewModel> _logger;
-
-    private string? _resolvedExePath;
 
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(ToggleCommand))]
     public partial bool IsRunning { get; set; }
@@ -27,155 +16,28 @@ public partial class HomeViewModel : ViewModelBase, INavigable
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(ToggleCommand))]
     public partial bool IsBusy { get; set; }
 
-    public HomeViewModel(
-        NavigationService navigationService,
-        IDialogService dialogs,
-        IToastService toasts,
-        PackageManager packages,
-        IThemeService theme,
-        ProcessManager process,
-        ILogger<HomeViewModel> logger)
+    public HomeViewModel(GoodByeDpiService service, NavigationService navigation)
     {
-        _navigation = navigationService;
-        _dialogs = dialogs;
-        _toasts = toasts;
-        _packages = packages;
-        _theme = theme;
-        _process = process;
-        _logger = logger;
+        _service = service;
+        _navigation = navigation;
 
-        IsRunning = _process.IsRunning;
-        _process.StateChanged += OnProcessStateChanged;
+        IsRunning = service.IsRunning;
+        IsBusy = service.IsBusy;
+
+        service.StateChanged += OnStateChanged;
     }
 
-    private void OnProcessStateChanged(object? sender, bool isRunning)
+    private void OnStateChanged(object? sender, GoodByeDpiStateChangedEventArgs e)
     {
-        IsRunning = isRunning;
-        if (!isRunning)
-        {
-            _theme.SetState(ThemeState.Stopped);
-        }
+        IsRunning = e.IsRunning;
+        IsBusy = e.IsBusy;
     }
 
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private async Task Toggle()
-    {
-        if (IsRunning)
-        {
-            await StopAsync();
-        }
-        else
-        {
-            await StartAsync();
-        }
-    }
-
-    private async Task StartAsync()
-    {
-        IsBusy = true;
-
-        string? exePath = _resolvedExePath;
-        bool downloadedNow = false;
-
-        if (exePath is null)
-        {
-            _theme.SetState(ThemeState.Downloading);
-
-            try
-            {
-                IToastHandle loading = _toasts.ShowLoading("GoodbyeDPI", "Preparing package…");
-                try
-                {
-                    DownloadResult result = await _packages.DownloadLatestAsync();
-                    exePath = result.ExePath;
-                    downloadedNow = result.DownloadedNow;
-                }
-                finally
-                {
-                    loading.Dismiss();
-                }
-
-                _resolvedExePath = exePath;
-            }
-            catch
-            {
-                _toasts.Show("Couldn't download GoodbyeDPI", "Checking for a local copy…", NotificationKind.Warning);
-
-                exePath = TryGetLocal();
-                if (exePath is null)
-                {
-                    _theme.SetState(ThemeState.Stopped);
-                    await _dialogs.ShowModal(
-                        "Can't start GoodbyeDPI",
-                        "The package couldn't be downloaded and no local copy was found. Check your connection and try again.",
-                        kind: NotificationKind.Error);
-                    IsBusy = false;
-                    return;
-                }
-            }
-        }
-
-        try
-        {
-            await _process.Start(exePath);
-            IsRunning = true;
-            _theme.SetState(ThemeState.Running);
-
-            if (downloadedNow)
-            {
-                _toasts.Show("GoodbyeDPI ready", $"{PackageTag(exePath)} downloaded and started.", NotificationKind.Success);
-            }
-        }
-        catch (Exception ex)
-        {
-            _theme.SetState(ThemeState.Stopped);
-            await _dialogs.ShowModal("Failed to start GoodbyeDPI", ex.Message, kind: NotificationKind.Error);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async Task StopAsync()
-    {
-        IsBusy = true;
-        try
-        {
-            await _process.Stop();
-            IsRunning = false;
-            _theme.SetState(ThemeState.Stopped);
-        }
-        catch (Exception ex)
-        {
-            await _dialogs.ShowModal("Failed to stop GoodbyeDPI", ex.Message, kind: NotificationKind.Error);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private string? TryGetLocal()
-    {
-        try
-        {
-            return _packages.GetLatestLocalVersion();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not enumerate local packages");
-            return null;
-        }
-    }
+    private Task Toggle() => _service.ToggleAsync();
 
     private bool CanToggle() => !IsBusy;
 
     [RelayCommand]
-    private void GoToSettings()
-    {
-        _navigation.NavigateTo<SettingsViewModel>();
-    }
-
-    private static string? PackageTag(string exePath) => Path.GetFileName(Path.GetDirectoryName(exePath));
+    private void GoToSettings() => _navigation.NavigateTo<SettingsViewModel>();
 }
