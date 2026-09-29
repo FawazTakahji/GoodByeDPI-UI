@@ -1,6 +1,5 @@
 using GoodByeDPI.Avalonia.Dialogs;
 using GoodByeDPI.Avalonia.Theming;
-using GoodByeDPI.Avalonia.Tray;
 using GoodByeDPI.Core.Dialogs;
 using GoodByeDPI.Core.Services;
 using GoodByeDPI.Core.Theming;
@@ -20,7 +19,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IToastService, ToastService>()
             .AddSingleton<IThemeService, ThemeService>()
             .AddSingleton<IWindowService, WindowService>()
-            .AddSingleton<TrayIconService>();
+            .AddSingleton<ITrayNotifyService, TrayNotifyService>();
 
         return services;
     }

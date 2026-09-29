@@ -8,27 +8,23 @@ using H.NotifyIcon.Core;
 
 namespace GoodByeDPI.Avalonia.Tray;
 
-public class TrayIconService
+public static class TrayManager
 {
-    private readonly GoodByeDpiService _service;
-    private readonly IWindowService _window;
+    private static GoodByeDpiService _service = null!;
+    private static IWindowService _window = null!;
 
-    private TrayIconWithContextMenu? _trayIcon;
-    private Icon? _trayRunningIcon;
-    private Icon? _trayOffIcon;
-    private PopupMenuItem? _trayToggleItem;
+    private static TrayIconWithContextMenu? _trayIcon;
+    private static Icon? _trayRunningIcon;
+    private static Icon? _trayOffIcon;
+    private static PopupMenuItem? _trayToggleItem;
 
-    private Action? _exit;
+    private static Action? _exit;
 
-    public TrayIconService(GoodByeDpiService service, IWindowService window)
-    {
-        _service = service;
-        _window = window;
-    }
-
-    public void Create(Action exit)
+    public static void Create(Action exit, GoodByeDpiService service, IWindowService window)
     {
         _exit = exit;
+        _service = service;
+        _window = window;
 
         _trayRunningIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/app.ico")));
         _trayOffIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/tray-off.ico")));
@@ -64,17 +60,22 @@ public class TrayIconService
         UpdateTray(_service.IsRunning, _service.IsBusy);
     }
 
-    public void Dispose()
+    public static void ShowNotification(string title, string message, NotificationIcon icon)
+    {
+        _trayIcon?.ShowNotification(title, message, icon);
+    }
+
+    public static void Dispose()
     {
         _trayIcon?.Dispose();
     }
 
-    private void OnServiceStateChanged(object? sender, GoodByeDpiStateChangedEventArgs e)
+    private static void OnServiceStateChanged(object? sender, GoodByeDpiStateChangedEventArgs e)
     {
         UpdateTray(e.IsRunning, e.IsBusy);
     }
 
-    private void UpdateTray(bool isRunning, bool isBusy)
+    private static void UpdateTray(bool isRunning, bool isBusy)
     {
         if (_trayIcon is null || _trayToggleItem is null || _trayRunningIcon is null || _trayOffIcon is null)
         {
@@ -86,7 +87,7 @@ public class TrayIconService
         _trayToggleItem.Enabled = !isBusy;
     }
 
-    private void ToggleWindow()
+    private static void ToggleWindow()
     {
         if (_window.IsVisible)
         {

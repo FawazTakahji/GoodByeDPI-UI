@@ -7,6 +7,8 @@ using GoodByeDPI.Avalonia.Services;
 using GoodByeDPI.Avalonia.Tray;
 using GoodByeDPI.Avalonia.Views;
 using GoodByeDPI.Core.Navigation;
+using GoodByeDPI.Core.Processes;
+using GoodByeDPI.Core.Services;
 using GoodByeDPI.Core.ViewModels;
 
 namespace GoodByeDPI.Avalonia;
@@ -32,10 +34,11 @@ public partial class App : Application
 
             WindowService.Attach(desktop.MainWindow);
 
-            TrayIconService tray = Ioc.Default.GetRequiredService<TrayIconService>();
-            tray.Create(() => desktop.Shutdown());
+            TrayManager.Create(() => desktop.Shutdown(),
+                Ioc.Default.GetRequiredService<GoodByeDpiService>(),
+                Ioc.Default.GetRequiredService<IWindowService>());
 
-            desktop.Exit += (_, _) => tray.Dispose();
+            desktop.Exit += (_, _) => TrayManager.Dispose();
         }
 
         Ioc.Default.GetRequiredService<NavigationService>()
