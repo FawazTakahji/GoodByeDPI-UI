@@ -1,5 +1,6 @@
 using GoodByeDPI.Core.Dialogs;
 using GoodByeDPI.Core.Packages;
+using GoodByeDPI.Core.Services;
 using GoodByeDPI.Core.Theming;
 using Microsoft.Extensions.Logging;
 
@@ -13,6 +14,8 @@ public class GoodByeDpiService
     private readonly IDialogService _dialogs;
     private readonly IToastService _toasts;
     private readonly IThemeService _theme;
+    private readonly IWindowService _window;
+    private readonly ITrayNotifyService _trayNotify;
 
     private string? _resolvedExePath;
 
@@ -27,7 +30,9 @@ public class GoodByeDpiService
         ProcessManager process,
         IDialogService dialogs,
         IToastService toasts,
-        IThemeService theme)
+        IThemeService theme,
+        IWindowService window,
+        ITrayNotifyService trayNotify)
     {
         _logger = logger;
         _packages = packages;
@@ -35,6 +40,8 @@ public class GoodByeDpiService
         _dialogs = dialogs;
         _toasts = toasts;
         _theme = theme;
+        _window = window;
+        _trayNotify = trayNotify;
 
         _process.StateChanged += OnProcessStateChanged;
     }
@@ -86,10 +93,16 @@ public class GoodByeDpiService
                 if (exePath is null)
                 {
                     _theme.SetState(ThemeState.Stopped);
-                    await _dialogs.ShowModal(
-                        "Can't start GoodbyeDPI",
-                        "The package couldn't be downloaded and no local copy was found. Check your connection and try again.",
-                        kind: NotificationKind.Error);
+                    const string title = "Can't start GoodbyeDPI";
+                    const string description = "The package couldn't be downloaded and no local copy was found. Check your connection and try again.";
+                    if (_window.IsVisible)
+                    {
+                        _dialogs.Show(title, description, kind: NotificationKind.Error);
+                    }
+                    else
+                    {
+                        _trayNotify.Show(title, description, NotificationKind.Error);
+                    }
                     SetBusy(false);
                     return;
                 }
@@ -108,8 +121,18 @@ public class GoodByeDpiService
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to start GoodbyeDPI");
             _theme.SetState(ThemeState.Stopped);
-            await _dialogs.ShowModal("Failed to start GoodbyeDPI", ex.Message, kind: NotificationKind.Error);
+            const string title = "GoodbyeDPI";
+            const string description = "An error occurred while starting GoodbyeDPI";
+            if (_window.IsVisible)
+            {
+                _dialogs.Show(title, description, kind: NotificationKind.Error);
+            }
+            else
+            {
+                _trayNotify.Show(title, description, NotificationKind.Error);
+            }
         }
         finally
         {
@@ -127,7 +150,17 @@ public class GoodByeDpiService
         }
         catch (Exception ex)
         {
-            await _dialogs.ShowModal("Failed to stop GoodbyeDPI", ex.Message, kind: NotificationKind.Error);
+            _logger.LogError(ex, "Failed to stop GoodbyeDPI");
+            const string title = "GoodbyeDPI";
+            const string description = "An error occurred while stopping GoodbyeDPI";
+            if (_window.IsVisible)
+            {
+                _dialogs.Show(title, description, kind: NotificationKind.Error);
+            }
+            else
+            {
+                _trayNotify.Show(title, description, NotificationKind.Error);
+            }
         }
         finally
         {
