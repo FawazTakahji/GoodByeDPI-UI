@@ -16,6 +16,7 @@ public static class TrayManager
     private static TrayIconWithContextMenu? _trayIcon;
     private static Icon? _trayRunningIcon;
     private static Icon? _trayOffIcon;
+    private static Icon? _trayLoadingIcon;
     private static PopupMenuItem? _trayToggleItem;
 
     private static Action? _exit;
@@ -28,6 +29,7 @@ public static class TrayManager
 
         _trayRunningIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/app.ico")));
         _trayOffIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/tray-off.ico")));
+        _trayLoadingIcon = new Icon(AssetLoader.Open(new Uri("avares://GoodByeDPI.Avalonia/Assets/Icons/tray-loading.ico")));
 
         _trayToggleItem = new PopupMenuItem { Text = "Start" };
         _trayToggleItem.Click += (_, _) => Dispatcher.UIThread.InvokeAsync(_service.ToggleAsync);
@@ -56,8 +58,8 @@ public static class TrayManager
             }
         };
 
-        _service.StateChanged += OnServiceStateChanged;
-        UpdateTray(_service.IsRunning, _service.IsBusy);
+        _service.StateChanged += (_, e) => UpdateTray(e);
+        UpdateTray(new GoodByeDpiStateChangedEventArgs(_service.Phase, _service.IsBusy));
     }
 
     public static void ShowNotification(string title, string message, NotificationIcon icon)
@@ -70,21 +72,21 @@ public static class TrayManager
         _trayIcon?.Dispose();
     }
 
-    private static void OnServiceStateChanged(object? sender, GoodByeDpiStateChangedEventArgs e)
+    private static void UpdateTray(GoodByeDpiStateChangedEventArgs e)
     {
-        UpdateTray(e.IsRunning, e.IsBusy);
-    }
-
-    private static void UpdateTray(bool isRunning, bool isBusy)
-    {
-        if (_trayIcon is null || _trayToggleItem is null || _trayRunningIcon is null || _trayOffIcon is null)
+        if (_trayIcon is null || _trayToggleItem is null || _trayRunningIcon is null || _trayOffIcon is null || _trayLoadingIcon is null)
         {
             return;
         }
 
-        _trayIcon.UpdateIcon(isRunning ? _trayRunningIcon.Handle : _trayOffIcon.Handle);
-        _trayToggleItem.Text = isRunning ? "Stop" : "Start";
-        _trayToggleItem.Enabled = !isBusy;
+        _trayIcon.UpdateIcon(e.Phase switch
+        {
+            GoodByeDpiPhase.Loading => _trayLoadingIcon.Handle,
+            GoodByeDpiPhase.Started => _trayRunningIcon.Handle,
+            _ => _trayOffIcon.Handle
+        });
+        _trayToggleItem.Text = e.Phase == GoodByeDpiPhase.Started ? "Stop" : "Start";
+        _trayToggleItem.Enabled = !e.IsBusy;
     }
 
     private static void ToggleWindow()

@@ -21,6 +21,7 @@ public class GoodByeDpiService
 
     public bool IsRunning => _process.IsRunning;
     public bool IsBusy { get; private set; }
+    public GoodByeDpiPhase Phase { get; private set; }
 
     public event EventHandler<GoodByeDpiStateChangedEventArgs>? StateChanged;
 
@@ -67,7 +68,7 @@ public class GoodByeDpiService
 
         if (exePath is null)
         {
-            _theme.SetState(ThemeState.Downloading);
+            SetPhase(GoodByeDpiPhase.Loading);
 
             try
             {
@@ -92,7 +93,7 @@ public class GoodByeDpiService
                 exePath = TryGetLocal();
                 if (exePath is null)
                 {
-                    _theme.SetState(ThemeState.Stopped);
+                    SetPhase(GoodByeDpiPhase.Stopped);
                     const string title = "Can't start GoodbyeDPI";
                     const string description = "The package couldn't be downloaded and no local copy was found. Check your connection and try again.";
                     if (_window.IsVisible)
@@ -112,7 +113,7 @@ public class GoodByeDpiService
         try
         {
             await _process.Start(exePath);
-            _theme.SetState(ThemeState.Running);
+            SetPhase(GoodByeDpiPhase.Started);
 
             if (downloadedNow)
             {
@@ -122,7 +123,7 @@ public class GoodByeDpiService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start GoodbyeDPI");
-            _theme.SetState(ThemeState.Stopped);
+            SetPhase(GoodByeDpiPhase.Stopped);
             const string title = "GoodbyeDPI";
             const string description = "An error occurred while starting GoodbyeDPI";
             if (_window.IsVisible)
@@ -146,7 +147,7 @@ public class GoodByeDpiService
         try
         {
             await _process.Stop();
-            _theme.SetState(ThemeState.Stopped);
+            SetPhase(GoodByeDpiPhase.Stopped);
         }
         catch (Exception ex)
         {
@@ -172,16 +173,34 @@ public class GoodByeDpiService
     {
         if (!isRunning)
         {
-            _theme.SetState(ThemeState.Stopped);
+            SetPhase(GoodByeDpiPhase.Stopped);
+            return;
         }
 
-        StateChanged?.Invoke(this, new GoodByeDpiStateChangedEventArgs(isRunning, IsBusy));
+        RaiseStateChanged();
+    }
+
+    private void SetPhase(GoodByeDpiPhase phase)
+    {
+        Phase = phase;
+        _theme.SetState(phase switch
+        {
+            GoodByeDpiPhase.Loading => ThemeState.Downloading,
+            GoodByeDpiPhase.Started => ThemeState.Running,
+            _ => ThemeState.Stopped,
+        });
+        RaiseStateChanged();
     }
 
     private void SetBusy(bool isBusy)
     {
         IsBusy = isBusy;
-        StateChanged?.Invoke(this, new GoodByeDpiStateChangedEventArgs(IsRunning, isBusy));
+        RaiseStateChanged();
+    }
+
+    private void RaiseStateChanged()
+    {
+        StateChanged?.Invoke(this, new GoodByeDpiStateChangedEventArgs(Phase, IsBusy));
     }
 
     private string? TryGetLocal()
