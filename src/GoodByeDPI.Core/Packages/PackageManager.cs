@@ -24,7 +24,7 @@ public class PackageManager
 
     public async Task<DownloadResult> DownloadLatestAsync(CancellationToken ct = default)
     {
-        Release release = await _client.GetLatestReleaseAsync("ValdikSS", "GoodbyeDPI", includePrereleases: true, ct);
+        Release release = await _client.GetLatestReleaseAsync(Constants.GBDGithubOwner, Constants.GBDGithubRepo, includePrereleases: true, ct);
         string exePath = Path.Combine(PackagesPath, release.TagName, "goodbyedpi.exe");
 
         await _downloadLock.WaitAsync(ct);
